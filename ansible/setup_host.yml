@@ -1,0 +1,20 @@
+---
+
+- hosts: cloud
+  remote_user: useradmin
+
+  tasks:
+
+   - name: Transferindo setup inicial
+     copy:
+       src: ../scripts/setup_host.sh
+       dest: /home/useradmin/setup_host.sh
+       owner: useradmin
+       group: useradmin
+       mode: '0755'
+
+   - name: Configurando o host
+     command: /home/useradmin/setup_host.sh
+     register: out
+
+   - debug: var=out.stdout_lines

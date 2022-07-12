@@ -1,0 +1,6 @@
+---
+
+- import_playbook: setup_host.yml
+- import_playbook: setup_java.yml
+- import_playbook: setup_metabase.yml
+- import_playbook: setup_jenkins.yml

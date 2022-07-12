@@ -1,0 +1,20 @@
+---
+
+- hosts: cloud
+  remote_user: useradmin
+
+  tasks:
+
+   - name: Transferindo setup do metabase
+     copy:
+       src: ../scripts/setup_metabase.sh
+       dest: /home/useradmin/setup_metabase.sh
+       owner: useradmin
+       group: useradmin
+       mode: '0755'
+
+   - name: Configurando o metabase
+     command: /home/useradmin/setup_metabase.sh
+     register: out
+
+   - debug: var=out.stdout_lines

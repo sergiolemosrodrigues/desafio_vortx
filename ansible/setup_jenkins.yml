@@ -1,0 +1,104 @@
+---
+
+- hosts: cloud
+  remote_user: useradmin
+
+  tasks:
+
+   - name: Download jenkins
+     become: true
+     get_url:
+       url: http://mirrors.jenkins.io/war-stable/latest/jenkins.war
+       dest: /tmp/jenkins.war
+       mode: '0644'
+
+   - name: Derruba o jenkins
+     become: true
+     ignore_errors: true
+     shell: "ps -ef | grep java | grep jenkins | awk '{print $2}' | xargs kill -9"
+
+   - name: Deletando usuario do jenkins
+     become: true
+     user:
+       name: jenkins
+       state: absent
+
+   - name: Deletando grupo do jenkins
+     become: true
+     group:
+       name: jenkins
+       state: absent
+
+   - name: Deletando diretorio do jenkins
+     become: true
+     file:
+       path: /home/jenkins
+       state: absent
+
+   - name: Criando grupo do jenkins
+     become: true
+     group:
+       name: jenkins
+       state: present
+
+   - name: Criando usuario do jenkins
+     become: true
+     user:
+       name: jenkins
+       shell: /bin/bash
+       home: /home/jenkins
+       group: jenkins
+       password: '*'
+
+   - name: Mudando permissoes no arquivo jenkins
+     become: true
+     file:
+       path: /tmp/jenkins.war
+       owner: jenkins
+       group: jenkins
+
+   - name: Transferindo o codigo para efetuar deploy do metabase
+     copy:
+       src: ../jenkins/deploy.sh
+       dest: /home/useradmin/deploy.sh
+       owner: useradmin
+       group: useradmin
+       mode: '0755'
+
+   - name: Transferindo lista de plugins do jenkins
+     copy:
+       src: ../jenkins/lista_de_plugins
+       dest: /home/useradmin/lista_de_plugins
+       owner: useradmin
+       group: useradmin
+       mode: '0644'
+
+   - name: Transferindo configuracao especifica do jenkins
+     copy:
+       src: ../jenkins/jenkins.model.JenkinsLocationConfiguration.xml
+       dest: /home/useradmin/jenkins.model.JenkinsLocationConfiguration.xml
+       owner: useradmin
+       group: useradmin
+       mode: '0644'
+
+   - name: Transferindo configuracao do job
+     copy:
+       src: ../jenkins/job.tar.gz
+       dest: /home/useradmin/job.tar.gz
+       owner: useradmin
+       group: useradmin
+       mode: '0644'
+
+   - name: Transferindo configuracoes do jenkins
+     copy:
+       src: ../scripts/setup_jenkins.sh
+       dest: /home/useradmin/setup_jenkins.sh
+       owner: useradmin
+       group: useradmin
+       mode: '0755'
+
+   - name: Configurando o jenkins ... esta etapa demora pois ira baixar os plugins e configurar o jenkins
+     command: /home/useradmin/setup_jenkins.sh
+     register: out
+
+   - debug: var=out.stdout_lines

@@ -1,0 +1,20 @@
+---
+
+- hosts: cloud
+  remote_user: useradmin
+
+  tasks:
+
+   - name: Transferindo setup do java
+     copy:
+       src: ../scripts/setup_java.sh
+       dest: /home/useradmin/setup_java.sh
+       owner: useradmin
+       group: useradmin
+       mode: '0755'
+
+   - name: Configurando o java
+     command: /home/useradmin/setup_java.sh
+     register: out
+
+   - debug: var=out.stdout_lines
